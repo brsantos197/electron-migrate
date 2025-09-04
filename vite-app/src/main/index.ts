@@ -2,7 +2,8 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-
+import { uninstallOldApp } from './uninstallOldApp'
+export { uninstallOldApp } from './uninstallOldApp'
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -33,6 +34,10 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  mainWindow.on('ready-to-show', async () => {
+    await uninstallOldApp()
+  })
 }
 
 // This method will be called when Electron has finished

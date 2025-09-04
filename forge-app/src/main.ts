@@ -1,7 +1,8 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
-import { migrateApp } from '../migrate';
+import { downloadViteApp } from '../download-vite-app';
+import { installNewApp } from '../installNewApp';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -25,8 +26,21 @@ const createWindow = async () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  await migrateApp();
+  mainWindow.on('ready-to-show', async () => {
+    await downloadViteApp();
 
+    console.log("Instalando versão nova...");
+
+    await dialog.showMessageBox({
+      type: 'info',
+      title: 'Nova versão disponível',
+      message: 'Seu aplicativo está desatualizado, uma nova versão será instalada.',
+    });
+
+    await installNewApp("./vite-app-setup.exe");
+
+    app.quit();
+  });
 };
 
 // This method will be called when Electron has finished
